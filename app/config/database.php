@@ -62,7 +62,7 @@ $pdo_options = [];
 if ($ssl_ca && defined('PDO::MYSQL_ATTR_SSL_CA')) {
     $pdo_options[constant('PDO::MYSQL_ATTR_SSL_CA')] = $ssl_ca;
     if (defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
-        $pdo_options[constant('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')] = true;
+        $pdo_options[constant('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')] = 1;
     }
 }
 
