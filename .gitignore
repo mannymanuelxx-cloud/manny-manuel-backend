@@ -20,4 +20,3 @@ runtime/*
 
 .env
 .env.*
-!.env.example
