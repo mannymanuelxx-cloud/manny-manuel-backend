@@ -43,4 +43,26 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
 |
 */
 
-$router->get('/', 'Welcome::index');
+$router->get('/', 'HealthController::index');
+$router->get('/health', 'HealthController::index');
+
+$router->post('/api/auth/register', 'AuthController::register');
+$router->post('/api/auth/login', 'AuthController::login');
+$router->post('/api/auth/refresh', 'AuthController::refresh');
+$router->post('/api/auth/logout', 'AuthController::logout');
+$router->options('/api/auth/{action}', 'ApiController::preflight');
+
+$router->get('/api/products', 'ProductsController::index');
+$router->post('/api/products', 'ProductsController::create');
+$router->put('/api/products/{num}', 'ProductsController::update');
+$router->patch('/api/products/{num}', 'ProductsController::update');
+$router->delete('/api/products/{num}', 'ProductsController::delete');
+$router->options('/api/products', 'ApiController::preflight');
+$router->options('/api/products/{num}', 'ApiController::preflight');
+
+$router->get('create-migration/{migration_class}', 'MigrationController::create_migration');
+$router->get('migrate', 'MigrationController::migrate');
+$router->get('rollback', 'MigrationController::rollback');
+$router->get('rollback-all', 'MigrationController::rollback_all');
+$router->get('refresh', 'MigrationController::refresh');
+$router->get('status', 'MigrationController::status');

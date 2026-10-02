@@ -1,5 +1,17 @@
 <?php
 defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
+$environment_file = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . '.env';
+if (is_file($environment_file)) {
+	$environment_values = parse_ini_file($environment_file, false, INI_SCANNER_RAW);
+	if (is_array($environment_values)) {
+		foreach ($environment_values as $key => $value) {
+			if (getenv($key) === false) {
+				putenv($key . '=' . $value);
+				$_ENV[$key] = $value;
+			}
+		}
+	}
+}
 /**
  * ------------------------------------------------------------------
  * LavaLust - an opensource lightweight PHP MVC Framework
@@ -64,7 +76,7 @@ $config['VERSION']                 = '4.6.0';
 | -------------------------------------------------------------------
 | Values: development and production
 */
-$config['ENVIRONMENT']             = 'development';
+$config['ENVIRONMENT']             = getenv('APP_ENV') ?: 'development';
 
 /*
 |--------------------------------------------------------------------------

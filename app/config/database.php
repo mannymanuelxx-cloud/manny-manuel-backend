@@ -57,15 +57,25 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
 |   Example: $database['another_example'] = array('key' => 'value')
 */
 
+$ssl_ca = getenv('DB_SSL_CA');
+$pdo_options = [];
+if ($ssl_ca && defined('PDO::MYSQL_ATTR_SSL_CA')) {
+    $pdo_options[constant('PDO::MYSQL_ATTR_SSL_CA')] = $ssl_ca;
+    if (defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
+        $pdo_options[constant('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')] = true;
+    }
+}
+
 $database['main'] = array(
-    'driver'	=> '',
-    'hostname'	=> '',
-    'port'		=> '',
-    'username'	=> '',
-    'password'	=> '',
-    'database'	=> '',
-    'charset'	=> '',
+    'driver'   => 'mysql',
+    'hostname' => getenv('DB_HOST') ?: '',
+    'port'     => getenv('DB_PORT') ?: '3306',
+    'username' => getenv('DB_USER') ?: '',
+    'password' => getenv('DB_PASSWORD') ?: '',
+    'database' => getenv('DB_NAME') ?: '',
+    'charset'  => 'utf8mb4',
     'dbprefix'	=> '',
+    'options'  => $pdo_options,
     // Optional for SQLite
     'path'      => ''
 );

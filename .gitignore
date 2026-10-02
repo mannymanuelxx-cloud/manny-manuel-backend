@@ -17,3 +17,7 @@ runtime/*
 *.stTheme.cache
 *.sublime-workspace
 *.sublime-project
+
+.env
+.env.*
+!.env.example

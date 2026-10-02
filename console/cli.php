@@ -4,6 +4,7 @@
 
 define('APP_DIR', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR);
 define('PUBLIC_DIR', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR);
+define('PREVENT_DIRECT_ACCESS', true);
 
 $command = $argv[1] ?? null;
 $input = $argv[2] ?? null;
@@ -49,7 +50,14 @@ switch ($command) {
         generate_middleware($input);
         break;
 
+    case 'make:command':
+        generate_command($input);
+        break;
+
     default:
+        if (dispatch_custom_command($command, array_slice($argv, 2))) {
+            break;
+        }
         echo danger("Invalid command: \"$command\"") . PHP_EOL;
         echo help_text();
         exit;
@@ -218,6 +226,63 @@ class {$class_name}Middleware
     write_file($file_path, $content, 'Middleware', $class_name . 'Middleware');
 }
 
+function generate_command($name) {
+    $class_name = ucfirst($name);
+    if (!$name || !preg_match('/^[A-Za-z][A-Za-z0-9_]*$/', $class_name)) {
+        echo danger('Command name must be a valid PHP class name.');
+        exit(1);
+    }
+
+    $folder_path = APP_DIR . 'command';
+    if (!is_dir($folder_path)) mkdir($folder_path, 0777, true);
+    $file_path = $folder_path . DIRECTORY_SEPARATOR . $class_name . '.php';
+    $content = implode(PHP_EOL, [
+        '<?php',
+        "defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');",
+        '',
+        'class ' . $class_name,
+        '{',
+        "    public static \$command = '" . strtolower($class_name) . "';",
+        "    public static \$description = 'Custom LavaLust command';",
+        '',
+        '    public function handle($action = null, array $flags = [], $name = null)',
+        '    {',
+        "        echo 'Implement the command action.' . PHP_EOL;",
+        '    }',
+        '}',
+        '',
+    ]);
+
+    write_file($file_path, $content, 'Command', $class_name);
+}
+
+function dispatch_custom_command($name, array $arguments) {
+    if (!$name || !preg_match('/^[A-Za-z][A-Za-z0-9_]*$/', $name)) {
+        return false;
+    }
+
+    $class_name = ucfirst($name);
+    $file_paths = [
+        APP_DIR . 'command' . DIRECTORY_SEPARATOR . $class_name . '.php',
+        APP_DIR . 'commands' . DIRECTORY_SEPARATOR . $class_name . '.php',
+    ];
+
+    foreach ($file_paths as $file_path) {
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            break;
+        }
+    }
+
+    if (!class_exists($class_name) || !isset($class_name::$command) || $class_name::$command !== $name) {
+        return false;
+    }
+
+    $instance = new $class_name();
+    $instance->handle($arguments[0] ?? null, [], $arguments[1] ?? null);
+    return true;
+}
+
 function generate_view($name) {
     $parts = explode('/', str_replace('\\', '/', $name));
     $base_name = array_pop($parts);
@@ -353,6 +418,11 @@ Usage: \033[1;33mphp lava <command> [options]\033[0m
   \033[1;32mmake:middleware\033[0m   → Creates a middleware
     Example: php lava make:middleware Auth
     Example: php lava make:middleware Admin/Role
+
+    \033[1;32mmake:command\033[0m      → Creates an app/command custom CLI command
+        Example: php lava make:command Migration
+
+    Custom commands are run as: php lava <command> [arguments]
 
 EOT;
 }
