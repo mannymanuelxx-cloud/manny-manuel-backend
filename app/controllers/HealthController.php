@@ -8,4 +8,13 @@ class HealthController extends Controller
         header('Content-Type: application/json; charset=UTF-8');
         echo json_encode(['status' => 'ok']);
     }
+
+    public function api()
+    {
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode([
+            'status' => 'ok',
+            'message' => 'Product Management API is running',
+        ]);
+    }
 }

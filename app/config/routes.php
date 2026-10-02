@@ -45,6 +45,7 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
 
 $router->get('/', 'HealthController::index');
 $router->get('/health', 'HealthController::index');
+$router->get('/api', 'HealthController::api');
 
 $router->post('/api/auth/register', 'AuthController::register');
 $router->post('/api/auth/login', 'AuthController::login');
